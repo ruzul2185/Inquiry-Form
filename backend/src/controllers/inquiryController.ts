@@ -8,7 +8,18 @@ import { InquiryBodyInput } from '../types/appScriptTypes';
 
 const getAllInquiries = async (req: Request, res: Response) => {
     try {
+
+      // Parse pagination query parameters
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
+        const skip = (page - 1) * limit;
+
+        // Fetch total count for pagination metadata
+        const totalCount = await prisma.inquiries.count();
+
         const inquiries = await prisma.inquiries.findMany({
+            skip,
+            take: limit,
             select: {
                 id: true,
                 full_name: true,
@@ -45,7 +56,16 @@ const getAllInquiries = async (req: Request, res: Response) => {
             return sanitizedInquiry;
         });
 
-        res.status(200).json(sanitized);
+        // Return response with pagination metadata
+        res.status(200).json({
+            data: sanitized,
+            pagination: {
+                total: totalCount,
+                page,
+                limit,
+                totalPages: Math.ceil(totalCount / limit),
+            },
+        });
         return;
     } catch (error) {
         console.error('Error fetching inquiries:', error);
@@ -88,55 +108,100 @@ const getSelectedInquiry = async (req: Request<{ id: string }, {}, {}>, res: Res
     }
 };
 
-const createInquiry = async (req: Request<{}, {}, InquiryBodyInput>, res: Response) => {
-    try {
-        const body = req.body;
+const createInquiry = async (
+  req: Request<{}, {}, Record<string, any>>,
+  res: Response
+): Promise<void> => {
+  try {
+    const body = req.body;
 
-        const data: Prisma.inquiriesCreateInput = {
-            full_name: body["Full Name"],
-            phone_number: new Prisma.Decimal(body["Phone Number"]),
-            date_of_birth: new Date(body["Date of Birth"]),
-            gender: body["Gender"],
-            email: body["Email"] || body["Email Address"] || null,
-            reference: body["Reference"],
-            current_address: body["Current Address"] || null,
-            permanent_address: body["Permanent Address"] || null,
-            course_selection: body["Which course are you looking for?"] || null,
-            course_duration: body["Course Duration"] || null,
-            user_availability: body["How many hours can you invest daily / monthly?"] || null,
-            job_guarentee: body["Are you looking for 100% Job guarantee?"] || null,
-            job_assistance: body["Are you interested in Job Assistance?"] || null,
-            job_location: body["Preferred Job Location"] || null,
-            expected_package: body["How much package do you wish to have?"] || null,
-            future_goal: body["Where do you want to see yourself after 5 years?"] || null,
-            career_transition_reason: body["Why do you want to shift into IT from any other field? (For Non - Technical)"] || null,
-            recent_education: body["Last Education"] || null,
-            passing_year:
-                body["Passing Year"] && !isNaN(Number(body["Passing Year"]))
-                    ? BigInt(body["Passing Year"])  // Changed from Prisma.Decimal to BigInt
-                    : null,
-            cgpa: body["CGPA"] && !isNaN(Number(body["CGPA"])) 
-                ? BigInt(Math.round(Number(body["CGPA"])))  // Changed to BigInt with rounding
-                : null,
-            };
-
-        const inquiry = await prisma.inquiries.create({ data });
-        res.status(200).json({
-            message: 'Inquiry added successfully'
-        });
-        return; 
-
-    } catch (error) {
-        console.error('Error adding inquiry:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
-        return;
+    // Basic required fields validation
+    if (!body.phone_number) {
+      res.status(400).json({ error: "Phone Number is required" });
+      return;
     }
+    if (!body.full_name) {
+      res.status(400).json({ error: "Full Name is required" });
+      return;
+    }
+    if (!body.date_of_birth) {
+      res.status(400).json({ error: "Date of Birth is required" });
+      return;
+    }
+
+    // Parse and validate phone_number as Prisma.Decimal
+    let phone_number: Prisma.Decimal;
+    try {
+      phone_number = new Prisma.Decimal(body.phone_number);
+    } catch {
+      res.status(400).json({ error: "Invalid Phone Number format" });
+      return;
+    }
+
+    // Parse and validate date_of_birth
+    const dob = new Date(body.date_of_birth);
+    if (isNaN(dob.getTime())) {
+      res.status(400).json({ error: "Invalid Date of Birth format" });
+      return;
+    }
+
+    // Optional numeric conversions for passing_year and cgpa
+    const passing_year =
+      body.passing_year && !isNaN(Number(body.passing_year))
+        ? BigInt(body.passing_year)
+        : null;
+
+    const cgpa =
+      body.cgpa && !isNaN(Number(body.cgpa))
+        ? BigInt(Math.round(Number(body.cgpa)))
+        : null;
+
+    // Prepare data for Prisma
+    const data: Prisma.inquiriesCreateInput = {
+      full_name: body.full_name,
+      phone_number,
+      date_of_birth: dob,
+      gender: body.gender || null,
+      email: body.email || null,
+      reference: body.reference || null,
+      current_address: body.current_address || null,
+      permanent_address: body.permanent_address || null,
+      course_selection: body.course_selection || null,
+      course_duration: body.course_duration || null,
+      user_availability: body.user_availability || null,
+      job_guarentee: body.job_guarentee || null,
+      job_assistance: body.job_assistance || null,
+      job_location: body.job_location || null,
+      expected_package: body.expected_package || null,
+      future_goal: body.future_goal || null,
+      career_transition_reason: body.career_transition_reason || null,
+      recent_education: body.recent_education || null,
+      passing_year,
+      cgpa,
+    };
+
+    console.log("Saving inquiry data:", data);
+
+    await prisma.inquiries.create({ data });
+
+    res.status(200).json({
+      message: "Inquiry added successfully",
+    });
+  } catch (error) {
+    console.error("Error adding inquiry:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
-const patchInquiry = async (req: Request<{ id: string }, {}, Partial<InquiryBodyInput>>, res: Response) => {
+
+const patchInquiry = async (
+  req: Request<{ id: string }, {}, Partial<InquiryBodyInput>>,
+  res: Response
+) => {
   try {
     const { id } = req.params;
     const body = req.body;
+
     const inquiryId = BigInt(id);
 
     const existingInquiry = await prisma.inquiries.findUnique({
@@ -144,43 +209,57 @@ const patchInquiry = async (req: Request<{ id: string }, {}, Partial<InquiryBody
     });
 
     if (!existingInquiry) {
-        res.status(404).json({ message: 'Inquiry not found' });
-        return
+      res.status(404).json({ message: "Inquiry not found" });
+      return;
     }
 
-    // Build data object only with fields present in request body
+    // Build update data object with only provided fields
     const data: Prisma.inquiriesUpdateInput = {};
 
-    if (body["Full Name"] !== undefined) data.full_name = body["Full Name"];
-    if (body["Phone Number"] !== undefined) data.phone_number = new Prisma.Decimal(body["Phone Number"]);
-    if (body["Date of Birth"] !== undefined) data.date_of_birth = new Date(body["Date of Birth"]);
-    if (body["Gender"] !== undefined) data.gender = body["Gender"];
-    if (body["Email"] !== undefined || body["Email Address"] !== undefined) 
-      data.email = body["Email"] ?? body["Email Address"] ?? null;
-    if (body["Reference"] !== undefined) data.reference = body["Reference"];
-    if (body["Current Address"] !== undefined) data.current_address = body["Current Address"] || null;
-    if (body["Permanent Address"] !== undefined) data.permanent_address = body["Permanent Address"] || null;
-    if (body["Which course are you looking for?"] !== undefined) data.course_selection = body["Which course are you looking for?"] || null;
-    if (body["Course Duration"] !== undefined) data.course_duration = body["Course Duration"] || null;
-    if (body["How many hours can you invest daily / monthly?"] !== undefined) data.user_availability = body["How many hours can you invest daily / monthly?"] || null;
-    if (body["Are you looking for 100% Job guarantee?"] !== undefined) data.job_guarentee = body["Are you looking for 100% Job guarantee?"] || null;
-    if (body["Are you interested in Job Assistance?"] !== undefined) data.job_assistance = body["Are you interested in Job Assistance?"] || null;
-    if (body["Preferred Job Location"] !== undefined) data.job_location = body["Preferred Job Location"] || null;
-    if (body["How much package do you wish to have?"] !== undefined) data.expected_package = body["How much package do you wish to have?"] || null;
-    if (body["Where do you want to see yourself after 5 years?"] !== undefined) data.future_goal = body["Where do you want to see yourself after 5 years?"] || null;
-    if (body["Why do you want to shift into IT from any other field? (For Non - Technical)"] !== undefined)
-      data.career_transition_reason = body["Why do you want to shift into IT from any other field? (For Non - Technical)"] || null;
-    if (body["Last Education"] !== undefined) data.recent_education = body["Last Education"] || null;
-    if (body["Passing Year"] !== undefined) {
-      if (!isNaN(Number(body["Passing Year"]))) {
-        data.passing_year = BigInt(body["Passing Year"]);  // Changed from Prisma.Decimal to BigInt
+    if (body.full_name !== undefined) data.full_name = body.full_name;
+    if (body.phone_number !== undefined)
+      data.phone_number = new Prisma.Decimal(body.phone_number);
+    if (body.date_of_birth !== undefined)
+      data.date_of_birth = new Date(body.date_of_birth);
+    if (body.gender !== undefined) data.gender = body.gender;
+    if (body.email !== undefined) data.email = body.email ?? null;
+    if (body.reference !== undefined) data.reference = body.reference;
+    if (body.current_address !== undefined)
+      data.current_address = body.current_address || null;
+    if (body.permanent_address !== undefined)
+      data.permanent_address = body.permanent_address || null;
+    if (body.course_selection !== undefined)
+      data.course_selection = body.course_selection || null;
+    if (body.course_duration !== undefined)
+      data.course_duration = body.course_duration || null;
+    if (body.user_availability !== undefined)
+      data.user_availability = body.user_availability || null;
+    if (body.job_guarentee !== undefined)
+      data.job_guarentee = body.job_guarentee || null;
+    if (body.job_assistance !== undefined)
+      data.job_assistance = body.job_assistance || null;
+    if (body.job_location !== undefined)
+      data.job_location = body.job_location || null;
+    if (body.expected_package !== undefined)
+      data.expected_package = body.expected_package || null;
+    if (body.future_goal !== undefined)
+      data.future_goal = body.future_goal || null;
+    if (body.career_transition_reason !== undefined)
+      data.career_transition_reason = body.career_transition_reason || null;
+    if (body.recent_education !== undefined)
+      data.recent_education = body.recent_education || null;
+
+    if (body.passing_year !== undefined && body.passing_year !== null) {
+      if (!isNaN(Number(body.passing_year))) {
+        data.passing_year = BigInt(body.passing_year as string | number);
       } else {
         data.passing_year = null;
       }
     }
-    if (body["CGPA"] !== undefined) {
-      if (!isNaN(Number(body["CGPA"]))) {
-        data.cgpa = BigInt(Math.round(Number(body["CGPA"])));  // Changed to BigInt with rounding
+
+    if (body.cgpa !== undefined) {
+      if (!isNaN(Number(body.cgpa))) {
+        data.cgpa = BigInt(Math.round(Number(body.cgpa)));
       } else {
         data.cgpa = null;
       }
@@ -192,17 +271,14 @@ const patchInquiry = async (req: Request<{ id: string }, {}, Partial<InquiryBody
     });
 
     if (!result) {
-      res.status(404).json({ message: 'Inquiry not found' });
+      res.status(404).json({ message: "Inquiry not found" });
       return;
     }
 
-    res.status(200).json({ message: 'Inquiry patched successfully' });
-    return;
-
+    res.status(200).json({ message: "Inquiry patched successfully" });
   } catch (error) {
-    console.error('Error patching inquiry:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
-    return;
+    console.error("Error patching inquiry:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 

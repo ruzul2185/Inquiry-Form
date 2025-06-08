@@ -1,32 +1,31 @@
-import { useState, useEffect, } from 'react';
-import supabase from './supabaseClient';
-import { Navigate } from 'react-router';
+import { useState, useEffect } from "react";
+import { Navigate } from "react-router";
+import type { ReactNode } from "react";
 
-import type { ReactNode } from 'react';
+import { getAccessToken } from "../utils/FetchUtils"; // Adjust path if needed
 
 const RouteProtection = ({ children }: { children: ReactNode }) => {
+  const [authenticated, setAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    const [authenticated, setAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await getAccessToken(); // If it throws, we're not authenticated
+        setAuthenticated(true);
+      } catch {
+        setAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const getSession = async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        setAuthenticated(!!session);
-        setLoading(false); 
-    }
+    checkAuth();
+  }, []);
 
-    useEffect( () => {
-        getSession();
-    },[])
+  if (loading) return <div>Checking ...</div>;
 
-    if (loading) {
-        return <div>Checking ...</div>
-    } else {
-        if (authenticated) {
-            return <>{children}</>
-        }
-        return <Navigate to={"/login"} />
-    }
-}
+  return authenticated ? <>{children}</> : <Navigate to="/login" />;
+};
 
 export default RouteProtection;
