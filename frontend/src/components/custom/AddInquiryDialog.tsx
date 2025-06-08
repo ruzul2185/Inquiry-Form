@@ -18,28 +18,7 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export type NewInquiryData = {
-  full_name: string;
-  phone_number: string;
-  date_of_birth: string;
-  gender: string;
-  email?: string;
-  reference: string;
-  current_address?: string;
-  permanent_address?: string;
-  course_selection?: string;
-  course_duration?: string;
-  user_availability?: string;
-  job_guarentee?: string;
-  job_assistance?: string;
-  job_location?: string;
-  expected_package?: string;
-  future_goal?: string;
-  career_transition_reason?: string;
-  recent_education?: string;
-  passing_year?: string;
-  cgpa?: string;
-};
+import type { NewInquiryData } from "@/types/InquiryTypes";
 
 type AddInquiryDialogProps = {
   open: boolean;
@@ -47,7 +26,11 @@ type AddInquiryDialogProps = {
   onSubmit: (inquiry: NewInquiryData) => void;
 };
 
-const AddInquiryDialog = ({ open, onOpenChange, onSubmit }: AddInquiryDialogProps) => {
+const AddInquiryDialog = ({
+  open,
+  onOpenChange,
+  onSubmit,
+}: AddInquiryDialogProps) => {
   const [newInquiry, setNewInquiry] = useState<NewInquiryData>({
     full_name: "",
     phone_number: "",
@@ -183,7 +166,9 @@ const AddInquiryDialog = ({ open, onOpenChange, onSubmit }: AddInquiryDialogProp
             <Label>Permanent Address</Label>
             <Textarea
               value={newInquiry.permanent_address}
-              onChange={(e) => handleChange("permanent_address", e.target.value)}
+              onChange={(e) =>
+                handleChange("permanent_address", e.target.value)
+              }
             />
           </div>
           <div>
@@ -204,7 +189,9 @@ const AddInquiryDialog = ({ open, onOpenChange, onSubmit }: AddInquiryDialogProp
             <Label>User Availability</Label>
             <Input
               value={newInquiry.user_availability}
-              onChange={(e) => handleChange("user_availability", e.target.value)}
+              onChange={(e) =>
+                handleChange("user_availability", e.target.value)
+              }
             />
           </div>
           <div>
@@ -246,7 +233,9 @@ const AddInquiryDialog = ({ open, onOpenChange, onSubmit }: AddInquiryDialogProp
             <Label>Career Transition Reason</Label>
             <Textarea
               value={newInquiry.career_transition_reason}
-              onChange={(e) => handleChange("career_transition_reason", e.target.value)}
+              onChange={(e) =>
+                handleChange("career_transition_reason", e.target.value)
+              }
             />
           </div>
           <div>

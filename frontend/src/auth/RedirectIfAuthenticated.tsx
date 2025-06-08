@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
-import { getAccessToken } from "../utils/FetchUtils"; // Adjust path if needed
+import { getAccessToken } from "@/utils/FetchUtils"; // Adjust path if needed
 
 const RedirectIfAuthenticated = ({ children }: { children: ReactNode }) => {
   const [checking, setChecking] = useState(true);

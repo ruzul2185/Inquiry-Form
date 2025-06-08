@@ -1,53 +1,59 @@
-import { BrowserRouter, Routes, Route } from 'react-router'
+// Core React Router imports
+import { BrowserRouter, Routes, Route } from "react-router";
 
-import './App.css'
-import LoginPage from './pages/LoginPage'
-import DashboardPage from './pages/DashboardPage'
+// Page components
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import ListInquiryPage from "./pages/ListInquiryPage";
 
-import AuthLayout from './layouts/AuthLayout'
-import RootLayout from './layouts/RootLayout'
+// Layout components
+import AuthLayout from "./layouts/AuthLayout";
+import RootLayout from "./layouts/RootLayout";
 
-import RouteProtection from './auth/RouteProtection'
-import RedirectIfAuthenticated from './auth/RedirectIfAuthenticated'
+// Auth components
+import RouteProtection from "./auth/RouteProtection";
+import RedirectIfAuthenticated from "./auth/RedirectIfAuthenticated";
 
-import { Toaster } from "@/components/ui/sonner"
-import ListInquiryPage from './pages/ListInquiryPage'
+// UI components
+import { Toaster } from "@/components/ui/sonner";
+
+// Root Application Component
+// Handles routing and layout structure of the application
 
 const App = () => {
-  
   return (
     <BrowserRouter>
-      {/* Place Toaster here, inside BrowserRouter */}
+      {/* Global toast notifications */}
       <Toaster position="top-right" />
 
       <Routes>
-        {/* AuthLayout wraps "/" and "/login" */}
-        <Route element={<RedirectIfAuthenticated><AuthLayout /></RedirectIfAuthenticated>}>
-          <Route path="/" element={
-              <LoginPage />
-          } />
+        {/* Public routes - Wrapped in AuthLayout and redirect if user is already authenticated */}
+        <Route
+          element={
+            <RedirectIfAuthenticated>
+              <AuthLayout />
+            </RedirectIfAuthenticated>
+          }
+        >
+          <Route path="/" element={<LoginPage />} />
         </Route>
 
-        {/* RootLayout wraps protected dashboard route */}
-        <Route element={<RouteProtection><RootLayout /></RouteProtection>}>
-          <Route
-            path="/dashboard"
-            element={
-                <DashboardPage />
-            }
-          />
-          <Route
-            path="/inquiry"
-            element={
-                <ListInquiryPage />
-            }
-          />
+        {/* Protected routes - Wrapped in RootLayout and require authentication */}
+        <Route
+          element={
+            <RouteProtection>
+              <RootLayout />
+            </RouteProtection>
+          }
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/inquiry" element={<ListInquiryPage />} />
         </Route>
 
-        {/* 404 fallback */}
+        {/* Fallback route for unmatched paths */}
         <Route path="*" element={<div>404 Page Not Found</div>} />
       </Routes>
     </BrowserRouter>
-  )
-}
-export default App
+  );
+};
+export default App;

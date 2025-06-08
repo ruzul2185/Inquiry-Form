@@ -8,7 +8,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import type { Inquiry } from "../../types/InquiryTypes";
+import type { Inquiry } from "@/types/InquiryTypes";
 
 interface DeleteInquiryDialogProps {
   open: boolean;

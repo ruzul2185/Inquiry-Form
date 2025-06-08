@@ -1,4 +1,5 @@
-import AddInquiryDialog, { type NewInquiryData } from "@/components/custom/AddInquiryDialog";
+import { type NewInquiryData } from "@/types/InquiryTypes";
+import AddInquiryDialog from "@/components/custom/AddInquiryDialog";
 import InquiryPagination from "@/components/custom/InquiryPagination";
 import InquiryTable from "@/components/custom/InquiryTable";
 import type { Inquiry, InquiryListProps } from "@/types/InquiryTypes";
@@ -31,25 +32,25 @@ const ListInquiryPage = () => {
   }, [pageFromUrl]);
 
   const fetchInquiries = async () => {
-      setLoading(true);
-      try {
-        const url = new URL(import.meta.env.VITE_INQUIRY_ENDPOINT);
-        url.searchParams.append("page", pagination.page.toString());
-        url.searchParams.append("pageSize", pagination.pageSize.toString());
+    setLoading(true);
+    try {
+      const url = new URL(import.meta.env.VITE_INQUIRY_ENDPOINT);
+      url.searchParams.append("page", pagination.page.toString());
+      url.searchParams.append("pageSize", pagination.pageSize.toString());
 
-        const json: InquiryListProps = await fetchGET(url.toString());
-        setInquiries(json.data);
-        setPagination((prev) => ({
-          ...prev,
-          total: json.pagination.total,
-          totalPages: json.pagination.totalPages,
-        }));
-      } catch (error) {
-        console.error("Failed to fetch inquiries", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const json: InquiryListProps = await fetchGET(url.toString());
+      setInquiries(json.data);
+      setPagination((prev) => ({
+        ...prev,
+        total: json.pagination.total,
+        totalPages: json.pagination.totalPages,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch inquiries", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchInquiries();

@@ -5,33 +5,11 @@ import ViewInquiryDialog from "./ViewInquiryDialog";
 import UpdateInquiryDialog from "./UpdateInquiryDialog";
 import DeleteInquiryDialog from "./DeleteInquiryDialog";
 
-import { fetchGET, fetchPATCH, fetchDELETE } from "../../utils/FetchUtils";
-import type { Inquiry } from "../../types/InquiryTypes";
+import { fetchGET, fetchPATCH, fetchDELETE } from "@/utils/FetchUtils";
+import type { Inquiry, FormState } from "@/types/InquiryTypes";
 
 // All form fields as strings for easy input binding
-type FormState = {
-  full_name: string;
-  phone_number: string;
-  date_of_birth: string;
-  age: string;
-  gender: string;
-  email: string;
-  reference: string;
-  current_address: string;
-  permanent_address: string;
-  course_selection: string;
-  course_duration: string;
-  user_availability: string;
-  job_guarentee: string;
-  job_assistance: string;
-  job_location: string;
-  expected_package: string;
-  future_goal: string;
-  career_transition_reason: string;
-  recent_education: string;
-  passing_year: string;
-  cgpa: string;
-};
+
 
 interface InquiryActionsProps {
   id: string;
