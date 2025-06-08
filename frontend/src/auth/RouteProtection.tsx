@@ -25,7 +25,7 @@ const RouteProtection = ({ children }: { children: ReactNode }) => {
 
   if (loading) return <div>Checking ...</div>;
 
-  return authenticated ? <>{children}</> : <Navigate to="/login" />;
+  return authenticated ? <>{children}</> : <Navigate to="/" />;
 };
 
 export default RouteProtection;

@@ -101,7 +101,6 @@ const ListInquiryPage = () => {
     <div className="p-6">
       <h1 className="text-2xl font-semibold mb-4 flex items-center justify-between">
         Inquiry List
-        <button onClick={() => setIsAddDialogOpen(true)}>Add Inquiry</button>
         <AddInquiryDialog
           open={isAddDialogOpen}
           onOpenChange={setIsAddDialogOpen}

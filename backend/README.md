@@ -4,7 +4,6 @@ This guide walks you through setting up the project, configuring Prisma ORM with
 
 ---
 
-
 ## 📦 Installation
 
 First, install all required dependencies and devDependencies:
@@ -23,16 +22,17 @@ cp ./.env.example ./.env
 
 Then, configure the following environment variables in the `.env` file:
 
-| Variable       | Description                                             |
-|----------------|---------------------------------------------------------|
-| `PORT`         | Port on which the server will run (e.g. 3000)           |
-| `DATABASE_URL` | Supabase PostgreSQL connection URL                      |
-| `DIRECT_URL`   | Direct URL for Prisma ORM to connect to Supabase        |
-| `CORS_ORIGIN`  | URL of your deployed frontend (for CORS policy)         |
+| Variable       | Description                                      |
+| -------------- | ------------------------------------------------ |
+| `PORT`         | Port on which the server will run (e.g. 3000)    |
+| `DATABASE_URL` | Supabase PostgreSQL connection URL               |
+| `DIRECT_URL`   | Direct URL for Prisma ORM to connect to Supabase |
+| `CORS_ORIGIN`  | URL of your deployed frontend (for CORS policy)  |
 
 ## 🔧 Prisma Setup
 
 #### 1. Initialize **Prisma**:
+
 ```bash
 npx prisma init
 ```
@@ -40,11 +40,13 @@ npx prisma init
 #### 2. Update the output directory in `prisma/schema.prisma`:
 
 Change this:
+
 ```prisma
 output = "../src/generated/prisma"
 ```
 
 To this:
+
 ```prisma
 output = "../generated/prisma"
 ```
@@ -63,7 +65,7 @@ datasource db {
 
 Run the following SQL query in the Supabase SQL Editor to create the `inquiries` table:
 
-``` PostgreSQL
+```PostgreSQL
 CREATE TABLE public.inquiries (
   id bigint GENERATED ALWAYS AS IDENTITY NOT NULL,
   created_at timestamp with time zone NOT NULL DEFAULT now(),
@@ -121,8 +123,8 @@ npm run dev
 
 ## 🧹 Other Useful Commands
 
-| Command           | Description                                     |
-|-------------------|-------------------------------------------------|
-| `npm run clean`   | Remove the `./dist` directory                   |
-| `npm run build`   | Transpile `.ts` files to CommonJS `.js` files   |
-| `npm run start`   | Start the compiled Node.js project              |
+| Command         | Description                                   |
+| --------------- | --------------------------------------------- |
+| `npm run clean` | Remove the `./dist` directory                 |
+| `npm run build` | Transpile `.ts` files to CommonJS `.js` files |
+| `npm run start` | Start the compiled Node.js project            |
