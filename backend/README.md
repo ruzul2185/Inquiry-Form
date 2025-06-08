@@ -128,3 +128,39 @@ npm run dev
 | `npm run clean` | Remove the `./dist` directory                 |
 | `npm run build` | Transpile `.ts` files to CommonJS `.js` files |
 | `npm run start` | Start the compiled Node.js project            |
+
+## 📁 Project Structure
+
+```bash
+📁 root/
+├── 📄 .env.example                # 🌱 Example environment variables
+├── 📄 package.json               # 📦 Node.js dependencies and scripts
+├── 📄 package-lock.json          # 🔒 Dependency lockfile
+├── 📄 tsconfig.json              # 🛠️ TypeScript configuration
+├── 📄 tsconfig.tsbuildinfo       # 🧱 TypeScript build info (auto-generated)
+│
+└── 📂 src/                       # 🔧 Source code directory
+    └── 📂 client/
+        └── prismaClient.ts      # 🔌 Prisma client instance
+    │
+    ├── 📂 controllers/           # 🎮 Request handlers for each route
+    │   ├── appScriptController.ts    # Handles app script-related logic
+    │   ├── dashboardController.ts    # Handles dashboard logic
+    │   └── inquiryController.ts      # Handles inquiry-related logic
+    │
+    ├── 📂 middleware/            # 🧱 Custom middleware functions
+    │   └── verifySupabaseToken.ts   # Verifies JWT token from Supabase
+    │
+    ├── 📂 routes/                # 🚏 API route definitions
+    │   ├── appScriptRoutes.ts       # Routes for app script endpoints
+    │   ├── dashboardRoutes.ts       # Routes for dashboard data
+    │   └── inquiryRoutes.ts         # Routes for inquiries
+    │
+    ├── 📂 types/                 # 🧾 TypeScript custom types
+    │   └── appScriptTypes.ts        # Types for app script data
+    │
+    ├── 📂 utils/                 # 🧠 Utility/helper functions
+    │   └── inquiryUtils.ts          # Helper functions for inquiries
+    │
+    └── 📄 index.ts
+```
